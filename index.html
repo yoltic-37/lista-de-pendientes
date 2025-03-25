@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarea de pendientes</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 140px);
+            /* Calcula el ancho dinámico */
+            padding: 10px;
+            /* Espaciado interno */
+            border: 1px solid #ccc;
+            /* Borde */
+            border-radius: 5px;
+            /* Bordes redondeados */
+            font-size: 1rem;
+            /* Tamaño de fuente */
+            margin-right: 10px;
+            /* Espaciado entre el campo y el botón */
+            box-sizing: border-box;
+            /* Incluye padding y border en el ancho total */
+        }
+
+        input[type="button"] {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="button"]:hover {
+            background-color: #2980b9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #34495e;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            white-space: normal;         /* Permite saltos de línea */
+            overflow-wrap: break-word;   /* Ajusta el texto cuando alcanza el límite del contenedor */
+            word-break: break-word;      /* Fuerza el salto de palabras largas */
+            max-width: 100%;             /* Limita el ancho del elemento */
+            box-sizing: border-box;      /* Incluye padding y border dentro del ancho total */
+            display: flex;               /* Flexbox para el diseño */
+            flex-wrap: wrap;             /* Permite el ajuste del contenido */
+            align-items: flex-start;     /* Alineación al inicio */
+            padding: 10px 15px;          /* Espaciado interno */
+            margin-bottom: 10px;         /* Separación entre elementos */
+            background-color: #ecf0f1;   /* Fondo */
+            border: 1px solid #ddd;      /* Borde */
+            border-radius: 5px;          /* Bordes redondeados */
+            transition: background-color 0.3s ease; /* Efecto hover */
+        }
+
+        li:hover {
+            background-color: #bdc3c7;
+        }
+
+
+        li input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Lista de Tareas</h1>
+
+        <p>Agregar una nueva tarea</p>
+        <input type="text" onkeyup="if(event.keyCode == 13) agregarTarea()" id="tarea" placeholder="Escribe una tarea">
+        <input type="button" value="Agregar" onclick="agregarTarea()">
+
+        <h2>Tareas pendientes</h2>
+        <ul id="tareasPendientes"></ul>
+        <input type="button" value="Terminar" onclick="moverTareaPendiente()"
+            title="Al terminar una tarea se movera a la lista de Tareas hechas">
+
+        <h2>Tareas ya hechas</h2>
+        <ul id="tareasHechas"></ul>
+        <input type="button" value="Eliminar" onclick="eliminarTareaHecha()" title="Eliminar tareas permanentemente">
+    </div>
+
+    <script type="text/javascript">
+        var contador = 0;
+
+        function escaparHTML(texto) {
+            return texto.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function sanitizar(texto) {
+            return texto.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function agregarTarea() {
+            const tarea = document.getElementById("tarea").value.trim();
+            const tareaEscapada = sanitizar(tarea);
+
+
+            if (tarea === "") {
+                alert("Debes escribir una tarea");
+                return;
+            }
+
+            const listaPendientes = document.getElementById("tareasPendientes").innerText.toLowerCase();
+            if (listaPendientes.includes(tarea.toLowerCase())) {
+                alert("La tarea ya existe");
+                document.getElementById("tarea").value = "";
+                return;
+            }
+
+            const nuevaTarea = document.createElement("li");
+            nuevaTarea.id = `tarea-${contador}`;
+            nuevaTarea.innerHTML = `<input type='checkbox' id='check-${contador}'> ${tareaEscapada}`;
+            document.getElementById("tareasPendientes").appendChild(nuevaTarea);
+
+            contador++;
+            document.getElementById("tarea").value = "";
+        }
+
+        function moverTareaPendiente() {
+            var tareasPendientes = document.getElementById("tareasPendientes");
+            var hijos = tareasPendientes.children;
+
+            if (hijos.length === 0) {
+                alert("No hay tareas pendientes");
+                return;
+            }
+
+            if (!hijos[0].children[0].checked) {
+                alert("Debes seleccionar las tareas que deseas eliminar");
+                return;
+
+            }
+
+            var mensaje = confirm("¿Estás seguro de eliminar la(s) tarea(s)?");
+            if (!mensaje) {
+                return;
+            }
+
+            for (var i = 0; i < hijos.length; i++) {
+                if (hijos[i].children[0].checked) {
+                    var tarea = hijos[i].innerText;
+                    var nuevaTarea = document.createElement("li");
+                    nuevaTarea.id = `tarea-${contador}`;
+                    nuevaTarea.innerHTML = `<input type='checkbox' id='check-${contador}'> ${tarea}`;
+                    document.getElementById("tareasHechas").appendChild(nuevaTarea);
+                    tareasPendientes.removeChild(hijos[i]);
+                    i--;
+                }
+            }
+        }
+
+        function eliminarTareaHecha() {
+            var tareasHechas = document.getElementById("tareasHechas");
+            var hijos = tareasHechas.children;
+
+            if (hijos.length === 0) {
+                alert("No hay tareas hechas");
+                return;
+            }
+
+            if (!hijos[0].children[0].checked) {
+                alert("Debes seleccionar las tareas que deseas eliminar");
+                return;
+
+            }
+
+            var mensaje = confirm("¿Estás seguro de eliminar la(s) tarea(s)?");
+            if (!mensaje) {
+                return;
+            }
+
+            for (var i = 0; i < hijos.length; i++) {
+                if (hijos[i].children[0].checked) {
+                    tareasHechas.removeChild(hijos[i]);
+                    i--;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
